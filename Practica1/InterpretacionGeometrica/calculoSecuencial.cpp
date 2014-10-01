@@ -14,5 +14,5 @@ int main(){
 	for(int i=0; i<m; i++)
 		suma += funcion((i+0.5)/m);
 
-	cout <<  suma/m;
+		cout <<  suma/m;
 }
