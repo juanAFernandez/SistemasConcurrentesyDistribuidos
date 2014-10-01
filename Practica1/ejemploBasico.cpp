@@ -1,3 +1,8 @@
+/*
+Para compilar usamos la opicón -lpthread:
+	g++ ejemploBasico.cpp -lpthread
+*/
+
 #include <iostream>
 #include <pthread.h>
 using namespace std;
