@@ -31,4 +31,4 @@ Vamos a realizar la aproximación de la integral de la función 4/1+x² entre 0 
 
 Detalles:
 
-* Para la compilación es necesario la opción -ltr para poder usar las funciones de tiempo del sistema.
+* Para la compilación es necesario la opción -lrt para poder usar las funciones de tiempo del sistema.
