@@ -27,8 +27,12 @@ void * funcion_hebra(void * ih_void){
 	double sumaParcial=0.0;
 }
 
-
+//Función que lanza la ejecución de las hebras:
 double calcular_integral_concurrente(){
+	//Declaración de las hebras:
+	pthread_t hebra1, hebra2;
+	pthread_create(&hebra1, NULL, funcion_hebra, NULL);
+	pthread_create(&hebra2, NULL, funcion_hebra, NULL);
 
 }
 
