@@ -3,14 +3,14 @@
 #include "fun_tiempo.c"
 using namespace std;
 
-unsigned long m = 100000;
-
 double funcion(double x){
 	return 4.0/(1+x*x);
 }
 
-int main(){
+int main(int argc, char *argv[]){
 
+	int m = atoi(argv[1]);
+	
 	double suma;
 	
 	struct timespec inicio=ahora();
@@ -20,6 +20,7 @@ int main(){
 	
 	struct timespec fin=ahora();
 
-		cout << suma/m;
-		cout << "Tiempo transcurrido == " << duracion(&inicio, &fin) << " seg. " << endl;
+		cout << "Nº de Muestras: " << m << endl;
+		cout << "Resultado de la suma: " << suma/m << endl;
+		cout << "Tiempo transcurrido: " << duracion(&inicio, &fin) << " seg. " << endl;
 }
