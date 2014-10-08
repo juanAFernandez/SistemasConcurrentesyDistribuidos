@@ -1,8 +1,12 @@
 /*
-Cálculo concurrente de la integración.
-En este programa vamos a dividir la función en segmentos y para cada segmento le vamos
-a calcular el área. La suma de todas las areas será la aproximación del area que 
-se dibuja debajo de la función entre 0 y 1. Valor que conocemos de antemano, PI=3,1416...
+
+Versión 1.1
+
+Cálculo secuencial de la integral de la función 4/(1*x^2) entre 0 y 1 que da como resultado 
+el número PI=3.1415... como area de esa porción de función.
+Al programa se le pasa el número de muestras en el que queremos que se divida la función 
+para el cálculo de su area.
+
 */
 #include <iostream>
 #include "fun_tiempo.h"
@@ -36,14 +40,14 @@ int main(int argc, char *argv[]){
 		area += base*funcion(puntoMedio); // es igual a area= area+(base*funcion..)
 		puntoMedio += base;
 
-		cout << puntoMedio << endl;
-		cout << funcion(puntoMedio) << endl;
+		//cout << puntoMedio << endl;
+		//cout << funcion(puntoMedio) << endl;
 	}
 	
 	//Volvemos a capturar el tiempo en el instante de la ejecución de la orden.
 	struct timespec fin=ahora();
 
-		cout << "Nº de Muestras: " << m << endl;
-		cout << "Resultado de la suma: " << area << endl;
-		cout << "Tiempo transcurrido: " << duracion(&inicio, &fin) << " seg. " << endl;
+	double tiempo=duracion(&inicio, &fin);
+	//Salida para su uso posterior con gnuplot		
+	cout  << m << "  " << tiempo;
 }

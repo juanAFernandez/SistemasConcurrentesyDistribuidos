@@ -1,6 +1,8 @@
 /*
 Para compilar usamos la opicón -lpthread:
-	g++ ejemploBasico.cpp -lpthread
+	g++ ejemploBasico.cpp -o ejemploBasico -lpthread
+ejecutando con:
+	./ejemploBasico
 */
 
 #include <iostream>

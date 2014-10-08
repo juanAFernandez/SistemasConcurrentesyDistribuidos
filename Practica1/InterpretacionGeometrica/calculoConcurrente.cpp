@@ -1,5 +1,6 @@
 /*
-## VERSION 1 ##
+Versión 2.0
+
 División central de la función para las hebras para un número fijo de procesadores = 2
 
 Cálculo concurrente de la integración.
@@ -14,14 +15,13 @@ se dibuja debajo de la función entre 0 y 1. Valor que conocemos de antemano, PI
 using namespace std;
 
 //Para calcular el valor de la función para el valor x dado.
-//Es decir la altura de los rectángulos para calcular el area de los mismos.
-
-//Implementación de la función f(x)=4/(1+x^2):
+//Es decir la altura de los rectángulos para calcular el area de los mismos, implementación de la función f(x)=4/(1+x^2):
 double funcion(double x){
 	return 4.0/(1+x*x);
 
 }
 
+//Creamos un struct para poder pasarle datos a las hebras
 struct datos{
 	double primerPuntoMedio;
 	double base;
@@ -62,7 +62,11 @@ double calcular_integral_concurrente(int m){
 	//La base de todos los rectángulos.
 	double base = 1/(double)m;
 
-	//Declaración de los struct:
+	/*Declaración de los struct:
+	Dividimos la gráfica en dos secciones y sobre ellas trabajamos con la mitar del número
+	de muestras introducidas por el usuario en la ejecución.
+	*/
+
 	struct datos seccionA;
 	struct datos seccionB;
 
@@ -133,8 +137,7 @@ int main(int argc, char *argv[]){
 	//Volvemos a capturar el tiempo en el instante de la ejecución de la orden.
 	struct timespec fin=ahora();
 
-		cout << "### Versión Concurrente ###" << endl;
-		cout << "Nº de Muestras: " << m << endl;
-		cout << "Resultado de la suma: " << resultado << endl;
-		cout << "Tiempo transcurrido: " << duracion(&inicio, &fin) << " seg. " << endl;
+	double tiempo=duracion(&inicio, &fin);
+	//Salida para su uso posterior con gnuplot		
+	cout  << m << "  " << tiempo;
 }
