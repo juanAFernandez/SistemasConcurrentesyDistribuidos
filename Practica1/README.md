@@ -12,5 +12,8 @@ Problemea [Interpretacion Geométrica](https://github.com/juanAFernandez/Sistema
 
 #####Problema [Productor-Consumidor](https://github.com/juanAFernandez/SistemasConcurrentesyDistribuidos/tree/master/Practica1/ProductorConsumidor)
 
+Se resuelve el problema típico del productor consumidor que implementamos en dos hebras que trabajarán sobre un buffer en memoria compartida.
 
 #####Problema [Fumadores](https://github.com/juanAFernandez/SistemasConcurrentesyDistribuidos/tree/master/Practica1/Fumadores)
+
+Con las mismas herramientas tratamos un problema de complejidad superior al anterior.
