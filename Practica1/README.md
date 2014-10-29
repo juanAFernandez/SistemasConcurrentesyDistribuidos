@@ -10,7 +10,7 @@ Trás el seminario inicial realizamos un programa que mediante el uso de hebras 
 
 ##Prácticas:
 
-####Problema PRODUCTOR CONSUMIDOR
+####Problema [Productor-Consumidor](https://github.com/juanAFernandez/SistemasConcurrentesyDistribuidos/tree/master/Practica1/ProductorConsumidor)
 
 
-####Problema FUMADORES
+####Problema [Fumadores](https://github.com/juanAFernandez/SistemasConcurrentesyDistribuidos/tree/master/Practica1/Fumadores)
