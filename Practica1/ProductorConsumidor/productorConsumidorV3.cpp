@@ -71,6 +71,7 @@ void* producir(void *p){
 		cout << "Insertado en el buffer: " << buffer[primeraLibre] << endl;
 		//FIN
 
+		sem_wait(&mutex);
 		primeraLibre++;
 		sem_post(&mutex);
 
@@ -97,6 +98,7 @@ void* consumir(void *p){
 
 		sem_wait(&mutex);
 		primeraLibre--;
+		sem_post(&mutex);
 
 		//FIN
 
@@ -126,7 +128,7 @@ int main(){
 	sem_init(&puedeConsumir, 0, 0);
 
 	//Necesitamos otro semáforo a 1 para que pueda escribir en primeraLibre.
-	sem_init(&mutex, 0, 0);
+	sem_init(&mutex, 0, 1);
 
 
 	//Como el procesador del equipo sólo tiene dos nucleos usamos dos hebras.
