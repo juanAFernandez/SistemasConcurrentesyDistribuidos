@@ -6,11 +6,11 @@ En esta práctica trabajamos con hebras y semáforos del estandar POSIX.
 
 Trás el seminario inicial realizamos un programa que mediante el uso de hebras POSIX calcula una integral y vemos la comparativa de tiempos respecto a los tiempos de ejecución en secuencial.
 
-[Interpretacion Geométrica](https://github.com/juanAFernandez/SistemasConcurrentesyDistribuidos/tree/master/Practica1/InterpretacionGeometrica)
+Problemea [Interpretacion Geométrica](https://github.com/juanAFernandez/SistemasConcurrentesyDistribuidos/tree/master/Practica1/InterpretacionGeometrica)
 
 ##Prácticas:
 
-####Problema [Productor-Consumidor](https://github.com/juanAFernandez/SistemasConcurrentesyDistribuidos/tree/master/Practica1/ProductorConsumidor)
+#####Problema [Productor-Consumidor](https://github.com/juanAFernandez/SistemasConcurrentesyDistribuidos/tree/master/Practica1/ProductorConsumidor)
 
 
-####Problema [Fumadores](https://github.com/juanAFernandez/SistemasConcurrentesyDistribuidos/tree/master/Practica1/Fumadores)
+#####Problema [Fumadores](https://github.com/juanAFernandez/SistemasConcurrentesyDistribuidos/tree/master/Practica1/Fumadores)
