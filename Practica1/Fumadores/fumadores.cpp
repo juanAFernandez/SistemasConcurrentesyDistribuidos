@@ -1,5 +1,5 @@
 /*
-## Problema Productor-Consumidor ##
+## Problema FUMADORES ##
 
 Problema más complejo para creación de hebras y sincronización de las mismas usando semáforos.
 
