@@ -11,7 +11,7 @@ Funcionamiento:
 @Fecha: Octubre 2014
 
 Para compilar y ejecutar:
-Ubuntu> g++ productorConsumidor.cpp -o productorConsumidor -lpthread ; ./productorConsumidor 
+g++ productorConsumidor.cpp -o productorConsumidor -lpthread ; ./productorConsumidor 
 */
 
 #include <iostream>

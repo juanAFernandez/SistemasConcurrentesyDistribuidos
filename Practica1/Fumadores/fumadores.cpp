@@ -3,8 +3,14 @@
 
 Problema más complejo para creación de hebras y sincronización de las mismas usando semáforos.
 
+Funcionamiento:
+
+
 @Autor: Juan Antonio Fernández Sánchez
 @Fecha: Noviembre 2014
+
+Para compilar y ejecutar:
+g++ -o fumadores fumadores.cpp -lpthread; ./fumadores
 */
 #include <iostream>
 #include <stdlib.h>
