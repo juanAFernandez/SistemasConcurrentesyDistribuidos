@@ -34,9 +34,12 @@ sem_t mutex;
 //Necesitamos otro semáforo con el que bloquear al estanquero.
 sem_t semEstanquero;
 
-//Necesitamos otros tantos sermáforos como fumadores tengamos para poder bloquearlos.
-sem_t semaforoFumadorA, semaforoFumadorB, semaforoFumadorC;
+/*Necesitamos otros tantos sermáforos como fumadores tengamos para poder bloquearlos, es por esto por lo que
+necestamos un vector de semáforos. Ahora el fumador A será el 0, el fumador B el 1 y el C el 2 (por seguir con la anterior
+nomenclatura).*/
+sem_t semaforosFumadores[3];
 
+// --> La inicialización de los semáforos se realiza en el main. <--
 
 
 struct fumador{
@@ -73,14 +76,14 @@ void* suministrar(void *p){
 		// Según el ingrediente que se produzca se desbloquea a un fumador o a otro
 		
 		if(mostrador == 1)
-		   sem_post(&semaforoFumadorB);
+		   sem_post(&semaforosFumadores[1]); //El fumador 1 es el B
 
 		if(mostrador == 2)
-			sem_post(&semaforoFumadorC);
+			sem_post(&semaforosFumadores[2]); //El fumador 2 es el C
 
 		//Al fumador A le faltan cerillas: cuando se sirva el ingrediente nº tres se desbloquea a este fumador.
 		if(mostrador == 3)
-		   sem_post(&semaforoFumadorA);
+		   sem_post(&semaforosFumadores[0]); //El fumador 0 es el A
 
 		
 
@@ -107,7 +110,7 @@ void* fumaFumadorA(void *arg){
 	while(true){
 
 	//El fumador A no puede fumar hasta que el estanquero lo desbloquee cuando haya servido su ingrediente
-	sem_wait(&semaforoFumadorA);
+	sem_wait(&semaforosFumadores[0]);
 	//Tras entrar una vez no podrá volver a entrar hasta que alguien vuelva a desbloquear su entrada.
 
 
@@ -140,7 +143,7 @@ void* fumaFumadorB(void *p){
 	while(true){
 
 	//El fumador A no puede fumar hasta que el estanquero lo desbloquee cuando haya servido su ingrediente
-	sem_wait(&semaforoFumadorB);
+	sem_wait(&semaforosFumadores[1]);
 	//Tras entrar una vez no podrá volver a entrar hasta que alguien vuelva a desbloquear su entrada.
 
 
@@ -165,7 +168,7 @@ void* fumaFumadorC(void *p){
 	while(true){
 
 	//El fumador A no puede fumar hasta que el estanquero lo desbloquee cuando haya servido su ingrediente
-	sem_wait(&semaforoFumadorC);
+	sem_wait(&semaforosFumadores[2]);
 	//Tras entrar una vez no podrá volver a entrar hasta que alguien vuelva a desbloquear su entrada.
 
 
@@ -200,13 +203,17 @@ int main(){
 	// Inicializamos la semilla aleatoria
 	srand(time (NULL));
 
+	//Inicialización de los semáforos de exclusión mutua y del estanquero.
 	sem_init(&mutex, 0, 1);
-	//El semáforo que bloquea al fumador A debe inicializarse a 0 ya que al empezar la ejecución este no tendrá por que tener su ingrediente en el mostrador.
-	sem_init(&semaforoFumadorA, 0, 0);
-	sem_init(&semaforoFumadorB, 0, 0);
-	sem_init(&semaforoFumadorC, 0, 0);
-
 	sem_init(&semEstanquero,0,1);
+
+	//Ahora la inicialización de los semáforos de los fumadores se hace sobre el vector de estos.
+	//Después esto será un bucle.
+	sem_init(&semaforosFumadores[0],0, 0);
+	sem_init(&semaforosFumadores[1],0, 0);
+	sem_init(&semaforosFumadores[2],0, 0);
+
+	
 	
 	pthread_t estanquero, hebraFumadorA, hebraFumadorB, hebraFumadorC;
 
@@ -227,10 +234,13 @@ int main(){
 
 	//Destrucción de los semáforos
 	sem_destroy(&mutex);
-	sem_destroy(&semaforoFumadorA);
-	sem_destroy(&semaforoFumadorB);
-	sem_destroy(&semaforoFumadorC);
 	sem_destroy(&semEstanquero);
+
+	//La destrucción de los semáforos de los fumadores también se hace sobre el vector de los mismos.
+	sem_destroy(&semaforosFumadores[0]);
+	sem_destroy(&semaforosFumadores[1]);
+	sem_destroy(&semaforosFumadores[2]);
+	
 
 	
 }
