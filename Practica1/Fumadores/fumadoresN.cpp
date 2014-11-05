@@ -37,7 +37,7 @@ sem_t semEstanquero;
 /*Necesitamos otros tantos sermáforos como fumadores tengamos para poder bloquearlos, es por esto por lo que
 necestamos un vector de semáforos. Ahora el fumador A será el 0, el fumador B el 1 y el C el 2 (por seguir con la anterior
 nomenclatura).*/
-sem_t semaforosFumadores[3];
+sem_t *semaforosFumadores;
 
 // --> La inicialización de los semáforos se realiza en el main. <--
 
@@ -190,14 +190,39 @@ void* fumaFumadorC(void *p){
 
 
 
-int main(){
+int main(int argc, char *argv[]){
 
+	int numFumadores;
+
+	//Nos aseguramos de que el usuario introduzca el número de fumadores.
+	if(argc==2)
+		numFumadores = atoi(argv[1]);
+	else{
+		cout << "Necesito conocer el número de fumadores. Intentelo de nuevo." << endl;
+		return 0;
+	}
+
+	//Hacemos el tamaño del vector "semaforosFumadores" el necesario reservando memoria dinámica.
+	semaforosFumadores = new sem_t[numFumadores];
+
+	
 	//	0--> ningun ingrediente		1--> tabaco 		2--> papel		3--> cerillas
 
 	//Declaración de los objetos tipo fumador:
+
+	//Declaramos 
+	fumador vectorFumadores[numFumadores];
+
 	fumador fumadorA;
 	fumadorA.nombre="A";
 	fumadorA.ingredienteQueFalta=3;
+
+
+	//Le mostramos al usuario las características de los fumadores:
+	
+
+
+
 
 
 	// Inicializamos la semilla aleatoria
@@ -241,6 +266,7 @@ int main(){
 	sem_destroy(&semaforosFumadores[1]);
 	sem_destroy(&semaforosFumadores[2]);
 	
-
+	//Liberamos la memoria dinámica usada reservada por el vector de semáforos.+
+	delete[] semaforosFumadores;
 	
 }

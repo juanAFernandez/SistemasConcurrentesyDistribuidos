@@ -188,7 +188,7 @@ int main(){
 
 	pthread_create(&fumadorA, NULL, fumaFumadorA, NULL);
 	pthread_create(&fumadorB, NULL, fumaFumadorB, NULL);
-	pthread_create(&fumadorB, NULL, fumaFumadorC, NULL);
+	pthread_create(&fumadorC, NULL, fumaFumadorC, NULL);
 
 	//pthread_create(&fumadorB, NULL, fumar, NULL);
 	//pthread_create(&fumadorC, NULL, fumar, NULL);
