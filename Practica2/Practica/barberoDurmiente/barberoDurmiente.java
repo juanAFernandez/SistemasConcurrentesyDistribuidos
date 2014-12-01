@@ -1,9 +1,12 @@
 import java.util.Random;
 import monitor.* ;
 
+//Siempre debemos de hacer una comprobación del problema antes de bloquear o liberar un proceso. !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
 //##Clase auxiliar para dormir e imprimir.##//
-class aux
-{
+class aux{
   static Random genAlea = new Random() ;
   static void dormir_max( int milisecsMax ){
     try{
@@ -18,27 +21,60 @@ class aux
 }
 
 //##MONITOR##//
-class SalaEspera extends AbstractMonitor{
+class Barberia extends AbstractMonitor{
 
-
-  //Cola de procesos esperando en la sala de espera.
   private Condition colaSalaEspera=makeCondition();
+  private Condition colaBarbero=makeCondition();
+
+  //Invocado por los clientes para cortarse el pelo
+  public void cortarPelo(){
+    enter();
+      //Si el barbero está dormido lo despierta:
+      if(!colaBarbero.isEmpty())
+        colaBarbero.signal();
+    leave();
+  }
+
+  //Invocado por el barbero para esperar(si procede) a un nuevo cliente y sentarlo para el corte.
+  public void siguienteCliente(){
+    enter();
+      //Si no hay clientes el barbero se duerme:
+      if(colaSalaEspera.isEmpty())
+        colaBarbero.await();
+      else //Se llama (despierta) a un cliente.
+      colaSalaEspera.signal();
+    leave();
+
+  }
+
+  //Invocado por el barbero para indicar que ha terminado de cortar el pelo.
+  public void finCliente(){
+    enter();
+
+    leave();
+  }
 
 
-//##METODOS DEL MONITOR##//
+
 }
 
 class Barbero implements Runnable{
 
-  private SalaEspera salaEspera;
+  private Barberia barberia;
   public Thread thr;
 
-  public Barbero(SalaEspera salaPasada, String nombreHebra){
-    salaEspera=salaPasada;
+  public Barbero(Barberia nuevaBarberia, String nombreHebra){
+    barberia=nuevaBarberia;
     thr = new Thread(this, nombreHebra);
   }
 
   public void run(){
+    while(true){
+      aux.imprime("Llamando a siguiente cliente");
+      barberia.siguienteCliente();
+      aux.dormir_max(2500);
+      barberia.finCliente();
+    }
 
   }
 
@@ -46,15 +82,20 @@ class Barbero implements Runnable{
 
 class Cliente implements Runnable{
 
-  private SalaEspera salaEspera;
+  private Barberia barberia;
   public Thread thr;
 
-  public Cliente(SalaEspera salaPasada, String nombreHebra){
-    salaEspera=salaPasada;
+  public Cliente(Barberia nuevaBarberia, String nombreHebra){
+    barberia=nuevaBarberia;
     thr = new Thread(this,nombreHebra);
   }
 
   public void run(){
+
+    while(true){
+      barberia.cortarPelo();
+      aux.dormir_max(2000);
+    }
 
   }
 
@@ -71,10 +112,10 @@ class barberoDurmiente{
 
     aux.imprime("Barbero Durmiente");
 
-    SalaEspera salaEspera = new SalaEspera();
-    Barbero barbero = new Barbero(salaEspera, "barbero");
+    Barberia barberia = new Barberia();
+    Barbero barbero = new Barbero(barberia, "barbero");
 
-    Cliente clienteA = new Cliente(salaEspera, "clienteA");
+    Cliente clienteA = new Cliente(barberia, "clienteA");
 
     barbero.thr.start();
     clienteA.thr.start();

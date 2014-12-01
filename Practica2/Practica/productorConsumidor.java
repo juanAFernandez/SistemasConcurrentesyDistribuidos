@@ -1,5 +1,6 @@
-package monitor;
+import monitor.*;
 import java.util.Random;
+
 
 class MonitorLE extends AbstractMonitor{
 
