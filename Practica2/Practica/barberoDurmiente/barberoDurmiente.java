@@ -2,7 +2,7 @@ import java.util.Random;
 import monitor.* ;
 
 //Siempre debemos de hacer una comprobación del problema antes de bloquear o liberar un proceso. !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 //##Clase auxiliar para dormir e imprimir.##//
@@ -39,8 +39,10 @@ class Barberia extends AbstractMonitor{
   public void siguienteCliente(){
     enter();
       //Si no hay clientes el barbero se duerme:
-      if(colaSalaEspera.isEmpty())
+      if(colaSalaEspera.isEmpty()){
+        aux.imprime("El barbero se duerme");
         colaBarbero.await();
+      }
       else //Se llama (despierta) a un cliente.
       colaSalaEspera.signal();
     leave();
