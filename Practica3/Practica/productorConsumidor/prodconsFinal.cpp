@@ -5,9 +5,9 @@
 #include <stdlib.h>
 
 
-#define Productor 0
+//#define Productor 0
 #define Buffer  5
-#define Consumidor 2
+//#define Consumidor 2
 #define ITERS 20
 #define TAM 5
 
@@ -30,7 +30,7 @@ void productor(int numeroProductor){
   for (unsigned int i=0;i<ITERS;i++){
     value=i;
 
-    cout<< "Productor " << numeroProductor << " produce " <<value<<endl<<flush;
+    // cout<< "Productor " << numeroProductor << " produce " <<value<<endl<<flush;
     sleep(rand() % 2 );
     //Envío del contenido de la variable value, que es una unidad, de tipo MPI_INT al proceso Buffer (1),
     //con la etiqueta 0 en el comunicador MPI_COMM_WORLD
@@ -50,8 +50,8 @@ void buffer(){
 
   MPI_Status status; //Necesario para las funciones Recv y Probe.
 
-  //Si el productor se ejecuta 20 veces y el consumidor otras 20 el buffer tendrá que hacer el doble de operaciones, ya que interviene en todas.
-  for (unsigned int i=0;i<ITERS*2;i++){
+  //Si el productor se ejecuta 20 veces y el consumidor otras 20 el buffer tendrá que hacer el doble de operaciones, ya que interviene en todas. 9(operaciones) x 20
+  for (unsigned int i=0;i<ITERS*9;i++){
 
     /*Si el buffer está vacío el indice "pos" estará a 0 y por tanto no se puede leer de el buffer, sólo escribir. */
     if (pos==0)
@@ -68,9 +68,9 @@ void buffer(){
         MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
         //Cuando el mensaje llegue (puedes venirle del productor o del consumidor) activa una u otra acción.
 
-        //En este caso no solo hay un productor y hay que poder reconocer un mensaje enviado por cualquier de ellos.
+        //En este caso no solo hay un productor y hay que poder reconocer un mensaje enviado por cualquier de los que existen.
         if (status.MPI_SOURCE==0 || status.MPI_SOURCE==1 || status.MPI_SOURCE==2 || status.MPI_SOURCE==3 || status.MPI_SOURCE==4)
-          rama=0; //Se trata de un mensaje de un productor y activamos la acción necesario en el buffer.
+          rama=0; //Se trata de un mensaje de un productor y activamos la acción necesaria en el buffer.
           else //(serían los procesos del 6 al 9)
           rama=1; //Se trata de un proceso consumidor.
           }
@@ -98,7 +98,7 @@ void buffer(){
             //Si recibe un mensaje del consumidor es que quiere que le envíe un dato.
             case 1:
             //Se recibe la peticion sin hacer nada con ella (con el dato que nos envía "peticion") del consumidor identificado con MPI_SOURCE
-            MPI_Recv( &peticion, 1, MPI_INT, status.MPI_SOURCE, 0, MPI_COMM_WORLD,&status);
+            MPI_Recv( &peticion, 1, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD,&status);
             /*Se le envía el dato de forma síncrona (de la posicon pos-1 porque  pos ya ha sido movido antes) para que quede bloqueado el proceso hasta que el
             receptor empieza a reicibir la información.*/
             //Se envía el dato al consumidor que ha enviado el mensaje y que nosotros antes hemos captado su identificado con MPI_Probe
@@ -120,7 +120,7 @@ void buffer(){
         for (unsigned int i=0;i<ITERS;i++){
           MPI_Ssend(&peticion, 1, MPI_INT, Buffer, 0, MPI_COMM_WORLD);
           MPI_Recv(&value, 1,     MPI_INT, Buffer, 0, MPI_COMM_WORLD,&status );
-          cout<< "Consumidor recibe valor "<<value<<" de Buffer "<<endl<<flush;
+      //    cout<< "Consumidor recibe valor "<<value<<" de Buffer "<<endl<<flush;
           sleep(rand() % 2 );
           raiz=sqrt(value);
         }
@@ -153,3 +153,9 @@ void buffer(){
             MPI_Finalize( );
             return 0;
           }
+
+
+/*
+Si los mensajes por terminal se añaden en todos los procesos podemos tener errores en el orden, por eso es mejor sólo imprimirlos en el proceso buffer
+que sabemos que sólo es uno.
+*/
