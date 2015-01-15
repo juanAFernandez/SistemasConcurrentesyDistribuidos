@@ -24,15 +24,6 @@ for(int i=0; i<TAM; i++){
     cout << " [ ] ";
 }
 cout << endl;
-
-/*
-  for(int i=0; i<=pos; i++)
-    cout << " [ " << buffer[i] << " ] ";
-  for(int i=pos; i<TAM-1; i++)
-    cout << " [ ] ";
-  cout << endl;
-*/
-
 }
 
 void productor(int numeroProductor){
