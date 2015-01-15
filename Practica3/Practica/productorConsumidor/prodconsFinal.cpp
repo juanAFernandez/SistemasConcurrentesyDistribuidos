@@ -11,6 +11,10 @@
 #define ITERS 20
 #define TAM 5
 
+#define TAG_PRODUCTORES 0
+
+#define TAG_CONSUMIDORES 1
+
 using namespace std;
 
 void imprimeBuffer( int * buffer, int pos){
@@ -38,7 +42,7 @@ void productor(int numeroProductor){
     sleep(rand() % 2 );
     //Envío del contenido de la variable value, que es una unidad, de tipo MPI_INT al proceso Buffer (1),
     //con la etiqueta 0 en el comunicador MPI_COMM_WORLD
-    MPI_Ssend( &value, 1, MPI_INT, Buffer, 0, MPI_COMM_WORLD );
+    MPI_Ssend( &value, 1, MPI_INT, Buffer, TAG_PRODUCTORES, MPI_COMM_WORLD );
   }
 }
 
@@ -66,6 +70,12 @@ void buffer(){
       ya no se podrá escribir, sólo leer de el */
       }else if (pos==TAM){
       cout << "Selección de rama 1. Buffer lleno. " << endl;
+      MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+      cout << "Analizando mensaje de proceso " << status.MPI_SOURCE << endl;
+
+
+
+
       rama=1;
       /*Cuando el índice no esté ni a 0 (buffer vacío) ni a TAM (buffer lleno) estará en una posicón válida de escritura. */
       }else{
@@ -88,6 +98,7 @@ void buffer(){
             //Acción 0 || Productor ||
             //Si recibe un mensaje del productor es porque le está enviando datos.
             case 0:
+            cout << "entra en la rama 0" << endl;
             //Recibe los datos del productor y los graba en la posición del buffer indicada por pos &value[pos]
 
             /*
@@ -97,7 +108,7 @@ void buffer(){
             */
 
             //Recibimos de cualquier productor:
-            MPI_Recv( &value[pos], 1, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD,&status);
+            MPI_Recv( &value[pos], 1, MPI_INT, MPI_ANY_SOURCE, TAG_PRODUCTORES, MPI_COMM_WORLD,&status);
             cout<< "Buffer recibe "<< value[pos] << " de Productor " << status.MPI_SOURCE <<endl<<flush;
 
             //Como esa posición ha sido utilizada se adelanta pos una unidad.
@@ -107,19 +118,21 @@ void buffer(){
             //Acción 1 || Consumidor ||
             //Si recibe un mensaje del consumidor es que quiere que le envíe un dato.
             case 1:
+            cout << "entra en la rama 1 " << endl;
             //Se recibe la peticion sin hacer nada con ella (con el dato que nos envía "peticion") del consumidor identificado con MPI_SOURCE
-            MPI_Recv( &peticion, 1, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD,&status);
+            MPI_Recv( &peticion, 1, MPI_INT, MPI_ANY_SOURCE, TAG_CONSUMIDORES, MPI_COMM_WORLD,&status);
+            cout << "se recibe la petición de un consumidor " << endl;
             /*Se le envía el dato de forma síncrona (de la posicon pos-1 porque  pos ya ha sido movido antes) para que quede bloqueado el proceso hasta que el
             receptor empieza a reicibir la información.*/
             //Se envía el dato al consumidor que ha enviado el mensaje y que nosotros antes hemos captado su identificado con MPI_Probe
-            MPI_Ssend( &value[pos-1], 1, MPI_INT, status.MPI_SOURCE, 0, MPI_COMM_WORLD);
-            cout<< "Buffer envía "<< value[pos-1] << " a Consumidor "<<endl<<flush;
+            MPI_Ssend( &value[pos-1], 1, MPI_INT, status.MPI_SOURCE, TAG_CONSUMIDORES, MPI_COMM_WORLD);
+            cout<< "Buffer envía "<< value[pos-1] << " a Consumidor "<< status.MPI_SOURCE << endl<<flush;
             //Como el dato ha sido enviado y esa celda "se vacía (no lo hace realmente)" se atrasa el índice una posición.
             pos--;
             imprimeBuffer(value, pos);
 
             break;
-          }
+          } //Fin switch
 
         }
 
@@ -130,8 +143,8 @@ void buffer(){
         int value,peticion=1; float raiz;
         MPI_Status status;
         for (unsigned int i=0;i<ITERS;i++){
-          MPI_Ssend(&peticion, 1, MPI_INT, Buffer, 0, MPI_COMM_WORLD);
-          MPI_Recv(&value, 1,     MPI_INT, Buffer, 0, MPI_COMM_WORLD,&status );
+          MPI_Ssend(&peticion, 1, MPI_INT, Buffer, TAG_CONSUMIDORES, MPI_COMM_WORLD);
+          MPI_Recv(&value, 1,     MPI_INT, Buffer, TAG_CONSUMIDORES, MPI_COMM_WORLD,&status );
       //    cout<< "Consumidor recibe valor "<<value<<" de Buffer "<<endl<<flush;
           sleep(rand() % 2 );
           raiz=sqrt(value);
