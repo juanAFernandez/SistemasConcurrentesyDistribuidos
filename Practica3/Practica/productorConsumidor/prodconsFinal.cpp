@@ -14,12 +14,25 @@
 using namespace std;
 
 void imprimeBuffer( int * buffer, int pos){
-  cout << " ## Buffer ## ";
-  for(int i=0; i<pos; i++)
+  cout << " ## Buffer ## (pos: " << pos << ") ";
+
+for(int i=0; i<TAM; i++){
+  //Cuando hay datos, como pos marca la última celda con ellos se imprimen hasta ella.
+  if(i<=pos-1)
     cout << " [ " << buffer[i] << " ] ";
-  for(int i=pos; i<TAM; i++)
+  else //Se imprime el resto de celdas vacías:
+    cout << " [ ] ";
+}
+cout << endl;
+
+/*
+  for(int i=0; i<=pos; i++)
+    cout << " [ " << buffer[i] << " ] ";
+  for(int i=pos; i<TAM-1; i++)
     cout << " [ ] ";
   cout << endl;
+*/
+
 }
 
 void productor(int numeroProductor){
@@ -52,20 +65,23 @@ void buffer(){
 
   //Si el productor se ejecuta 20 veces y el consumidor otras 20 el buffer tendrá que hacer el doble de operaciones, ya que interviene en todas. 9(operaciones) x 20
   for (unsigned int i=0;i<ITERS*9;i++){
+    cout << "Iteración : " << i << endl;
 
     /*Si el buffer está vacío el indice "pos" estará a 0 y por tanto no se puede leer de el buffer, sólo escribir. */
-    if (pos==0)
+    if (pos==0){
+      cout << "Selección de rama 0. Buffer vacío. " << endl;
       rama=0;
       /* Si el bufer está lleno "pos" será igual al tamaño del buffer, habrá sobrepasado la última posición de escritura del buffer y
       ya no se podrá escribir, sólo leer de el */
-      else if (pos==TAM)
+      }else if (pos==TAM){
+      cout << "Selección de rama 1. Buffer lleno. " << endl;
       rama=1;
-
       /*Cuando el índice no esté ni a 0 (buffer vacío) ni a TAM (buffer lleno) estará en una posicón válida de escritura. */
-      else{
+      }else{
         //Chequeo bloqueante para un mensaje.
         //Consulto un mensaje que me llega bloqueándolo, para tomar en este caso: UNA DECISION ANTES :> QUIEN LO RESOLVERÁ
         MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        cout << "Analizando mensaje de proceso " << status.MPI_SOURCE << endl;
         //Cuando el mensaje llegue (puedes venirle del productor o del consumidor) activa una u otra acción.
 
         //En este caso no solo hay un productor y hay que poder reconocer un mensaje enviado por cualquier de los que existen.
@@ -73,7 +89,9 @@ void buffer(){
           rama=0; //Se trata de un mensaje de un productor y activamos la acción necesaria en el buffer.
           else //(serían los procesos del 6 al 9)
           rama=1; //Se trata de un proceso consumidor.
-          }
+      }
+
+          cout << "SWITCH rama " << endl;
 
           switch(rama){
             //Acción 0 || Productor ||
@@ -90,9 +108,10 @@ void buffer(){
             //Recibimos de cualquier productor:
             MPI_Recv( &value[pos], 1, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD,&status);
             cout<< "Buffer recibe "<< value[pos] << " de Productor " << status.MPI_SOURCE <<endl<<flush;
-            imprimeBuffer(value, pos);
+
             //Como esa posición ha sido utilizada se adelanta pos una unidad.
             pos++;
+            imprimeBuffer(value, pos);
             break;
             //Acción 1 || Consumidor ||
             //Si recibe un mensaje del consumidor es que quiere que le envíe un dato.
@@ -106,6 +125,8 @@ void buffer(){
             cout<< "Buffer envía "<< value[pos-1] << " a Consumidor "<<endl<<flush;
             //Como el dato ha sido enviado y esa celda "se vacía (no lo hace realmente)" se atrasa el índice una posición.
             pos--;
+            imprimeBuffer(value, pos);
+
             break;
           }
 
@@ -139,13 +160,13 @@ void buffer(){
         //Decisión por rank del método al que llamaŕa cada proceso.
         if (size!=10) {cout<< "El numero de procesos debe ser 10, 5 productores, 1 buffer y 4 consumidores " <<endl;return 0;}
           if ( rank==0 || rank==1 || rank==2 || rank==3 || rank==4 ){
-            cout << "Se lanza productor " << rank << endl;
+            //cout << "Se lanza productor " << rank << endl;
             productor(rank);
           }else if (rank==Buffer){
-              cout << "Se lanza el buffer";
+              //cout << "Se lanza el buffer";
               buffer();
             }else {
-                cout << "Se lanza consumidor " << rank << endl;
+                //cout << "Se lanza consumidor " << rank << endl;
                 consumidor();
               }
 
