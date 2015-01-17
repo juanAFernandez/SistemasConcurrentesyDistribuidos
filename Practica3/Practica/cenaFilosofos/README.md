@@ -1,6 +1,7 @@
-#La cena de los filósofos
+#Problema de la [cena de los filósofos](http://es.wikipedia.org/wiki/Problema_de_la_cena_de_los_fil%C3%B3sofos)
 
 Problema clásico de concurrencia que se usa mucho para ejemplificar el interbloqueo, nosotros vamos a dar una aproximación con paso de mensajes con **OpenMPI**.
+propuesto por Edsger Dijkstra en 1965 para representar el problema de la sincronización de procesos en un sistema operativo.
 
 **Idea**:
 
