@@ -50,7 +50,7 @@ void Filosofo(int id, int nprocesos){
  int izq=(id+1)%nprocesos; //Proceso de mi izquierda
  int der=(id-1+nprocesos)%nprocesos; //Proceso de mi derecha
 
- /*
+
  //EVITANDO EL INTERBLOQUEO:
  //Para que el proceso filósofo 0 realice la petición de tenedores al revés.
  if(id==0){
@@ -58,7 +58,7 @@ void Filosofo(int id, int nprocesos){
    der=izq;
    izq=aux;
  }
- */
+ 
  int peticion, respuesta;
  MPI_Status status;
 
@@ -180,15 +180,6 @@ void Tenedor(int idProcesoTenedor, int nprocesos){
 
       cout << "Ten. " << idProcesoTenedor << " recibe liberac. de " << filosofoIzquierda << endl << flush;
     }
-
-
-
-    // Espera a que el filosofo suelte el tenedor...
-
-//    MPI_Recv(&peticion, 1, MPI_INT, MPI_ANY_SOURCE, TAG_FILOSOFOS, MPI_COMM_WORLD, &status);
-
-//    cout<<"Ten. "<<idProcesoTenedor<<" recibe liberac. de "<<Filo<<endl<<flush;
-
 
   }
 }
