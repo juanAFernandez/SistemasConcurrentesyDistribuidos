@@ -1,3 +1,18 @@
+/*
+  @Author: Juan Antonio Fernández Sánchez
+  @email: juan.antonio.fernandez.sanchez.88@gmail.com
+  @date: 20 Enero 2015
+
+  @About:
+  Segunda implementación del problema de los filósofos, esta vez con un camarero, proceso 11, que será
+  el encargado de evitar el interbloqueo.
+
+  @Execute: mpicxx -o filosofosConCamarero filosofosConCamarero.cpp ; mpirun -np 11 filosofosConCamarero
+
+
+*/
+
+
 #include "mpi.h"
 #include <iostream>
 #include <time.h>
@@ -5,10 +20,13 @@
 
 #define TAG_FILOSOFOS 0
 
+#define CAMARERO 10
+
 using namespace std;
 
 void Filosofo(int idProcesoTenedor, int nprocesos);
 void Tenedor (int id, int nprocesos);
+void Camarero (int idCamarero, int nprocesos);
 
 int main(int argc,char** argv ){
   int rank,size;
@@ -19,18 +37,113 @@ int main(int argc,char** argv ){
   MPI_Comm_rank( MPI_COMM_WORLD, &rank );
   MPI_Comm_size( MPI_COMM_WORLD, &size );
 
-  if( size!=10){
+  if( size!=11){
     if(rank == 0)
-      cout<<"El numero de procesos debe ser 10"<<endl<<flush;
+      cout<<"El numero de procesos debe ser 11"<<endl<<flush;
       MPI_Finalize( ); return 0;
+  }
+
+  //Selección del rol aisgnado a cada proceso.
+  if( rank==10  )
+      Camarero(rank, size); //El proceso n.11 (id/rank=10) será el que ejecute el método camarero.
+  else if ((rank%2) == 0)
+        Filosofo(rank,size-1); // Los pares son Filosofos
+       else Tenedor(rank,size-1);  // Los impares son Tenedores
+
+    /* Como hemos añadido un nuevo proceso, para que los filósofos una vez en la mesa y los tenedors funcionando
+       sigan comportándose como en la primera versión enviamos el número 10 como size para que no alteren su funcionamiento.
+    */
+
+
+    MPI_Finalize( );
+    return 0;
     }
-    //Selección del rol aisgnado a cada proceso.
-    if ((rank%2) == 0)
-      Filosofo(rank,size); // Los pares son Filosofos
-      else Tenedor(rank,size);  // Los impares son Tenedores
-      MPI_Finalize( );
-      return 0;
-    }
+
+
+    //Cada filósofo debe pedir permiso al camarero para sentarse.
+    //El camarero permitirá sentarse como máximo a 4 filósofos en la mesa.
+    void Camarero(int idCamarero, int nprocesos){
+
+      MPI_Status status;
+
+      cout << "##CAMARERO## Empieza a trabajar!" << endl << flush;
+
+
+      /*El camarero debe poder gestionar a los comensales y no permitir que se sientes más de cuatro.
+      Cada filósofo tiene su sitio asignado por lo que no tiene que preocuparse por eso.
+      Para realizar esta gestión podemos declarar un avariable que sea filosofosSentados y que aumente o
+      disminuya conforme vayan sentándose.
+
+       */
+      int filosofosSentados=0;
+      int peticion=0, respuesta=0;
+      bool sentarse=false;
+      bool levantarse=false;
+
+      while(1){//Me mantengo a la escucha constantemente
+
+
+        //1. Recibio petición de un filósofo que quiere hacer algo:
+
+          MPI_Recv(&peticion, 1, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status);
+
+        //2. Compruebo de que tipo es la petición, si de sentarse o de levantars de la mesa
+
+          if(peticion==1){ //Quiere sentarse
+            sentarse=true;
+            // cout << "Camarero recibe petición del proces " << status.MPI_SOURCE << " que quiere sentarse. " << endl << flush;
+          }
+          if(peticion==0){ //Quiere levantarse
+            levantarse=true;
+            // cout << "Camarero recibe petición del proces " << status.MPI_SOURCE << " que quiere levantarse. " << endl << flush;
+          }
+
+
+        if(sentarse){
+          // cout << "Camarero revista el estado de la mesa " << endl << flush;
+        //3. Compruebo si hay sentados cuatro filósofos:
+
+          if(filosofosSentados<4){
+            cout << "Camarero dice: hay " << filosofosSentados << " filosofos sentados " << endl << flush;
+            cout << "Camarero sienta a proceso  " << status.MPI_SOURCE << " en su sitio " << endl << flush;
+            respuesta=1; //RESPUESTA POSITIVA->> puede sentarse!
+            filosofosSentados++; //Aumento porque uno se va a sentar
+          }else{
+            //cout << "Camarero dice: no puede sentarse, hay " << filosofosSentados  << " filósofos " << endl << flush;
+            respuesta=0; //RESPUESTA NEGATIVA->> NO puede sentarse!
+          }
+        //4. Respondo al filósofo que me ha enviado la petición sin importarme quien ha sido:
+
+          //Le respondo, respuesta=1 si puede sentarse e =0 si no puede.
+          MPI_Ssend(&respuesta, 1, MPI_INT, status.MPI_SOURCE, 0, MPI_COMM_WORLD);
+
+          sentarse=false; //reinicio
+        }
+
+
+        if(levantarse){
+
+          /*Si quiere levantarse no se lo impido. */
+
+          //3. Respondo
+          MPI_Send(&respuesta, 1, MPI_INT, status.MPI_SOURCE, 0, MPI_COMM_WORLD);
+          filosofosSentados--;
+
+          levantarse=false; //reinicio
+        }
+
+
+
+     }//fin while
+
+
+
+    }//fin Camarero.
+
+
+
+
+
 
     void Filosofo(int id, int nprocesos){
 
@@ -41,7 +154,7 @@ int main(int argc,char** argv ){
       if(id==6) numFilosofo=3;
       if(id==8) numFilosofo=4;
 
-      cout << "Filosofo " << numFilosofo << " se sienta a la mesa" << endl;
+
 
       /*Conociendo la distribución de los comensales y los tenedores en la mesa,
       podemos saber cual es el tenedor que tengo a mi derecha y a mi izquierda. Necesito
@@ -50,20 +163,35 @@ int main(int argc,char** argv ){
       int izq=(id+1)%nprocesos; //Proceso de mi izquierda
       int der=(id-1+nprocesos)%nprocesos; //Proceso de mi derecha
 
-      /*
-      //EVITANDO EL INTERBLOQUEO:
-      //Para que el proceso filósofo 0 realice la petición de tenedores al revés.
-      if(id==0){
-      int aux=der;
-      der=izq;
-      izq=aux;
-    }
-    */
-    int peticion, respuesta;
+
+    int peticion=0, respuesta=0;
     MPI_Status status;
+    bool puedoSentarme=false;
+    bool puedoLevantarme=false;
 
     while(1){
+      //Bucle de petición de permiso de sentarme:
+      while(puedoSentarme==false){
 
+      // ##SECCIÓN INICIAL CAMARERO## //
+
+      //0. Antes de nada pide permiso para sentarse al camarero:
+
+      //Envío la petición al camarero.
+      peticion=1;//Significa que me quiero sentar.
+      MPI_Ssend(&peticion, 1, MPI_INT, CAMARERO, 0, MPI_COMM_WORLD );
+
+
+      //Me quedo esperando la respuesta del camarero para continuar:
+      MPI_Recv(&respuesta, 1, MPI_INT, CAMARERO, 0, MPI_COMM_WORLD, &status);
+      if(respuesta==1){//Puedo sentarme
+        puedoSentarme=true; //Salgo del bucle de petición de permiso.
+      //una vez recibida puedo empezar a comer.
+        cout << "Filosofo " << numFilosofo << " se sienta a la mesa" << endl;
+      }
+      // ##FIN SECCIÓN INICIAL CAMARERO## //
+
+      }
 
       //1. Necesita comer, para eso necesita dos tendores, los pido:
 
@@ -112,7 +240,29 @@ int main(int argc,char** argv ){
       cout<<"Filosofo "<<id<< " suelta tenedor der ..."<<der <<endl<<flush;
       MPI_Ssend(&peticion, 1, MPI_INT, der, der, MPI_COMM_WORLD);
 
-      //5.Después de comer y después de soltar los tenedores me pongo a pensar un rato:
+
+      //Bucle de petición de permiso de levantarme:
+      while(puedoLevantarme==false){
+
+        // ##SECCIÓN FINAL CAMARERO## //
+
+        //Para terminal pido permiso al camarero para levantarme:
+
+        //Envío la petición al camarero.
+        peticion=0;//Significa que me quiero LEVANTAR.
+        MPI_Ssend(&peticion, 1, MPI_INT, CAMARERO, 0, MPI_COMM_WORLD );
+
+
+        //Me quedo esperando la respuesta del camarero para continuar:
+        MPI_Recv(&respuesta, 1, MPI_INT, CAMARERO, 0, MPI_COMM_WORLD, &status);
+        if(respuesta==1)//Puedo levantarme
+          puedoLevantarme=true; //Salgo del bucle de petición de permiso.
+
+          // ##FIN SECCIÓN FINAL CAMARERO## //
+      }
+
+
+      //5.Después del permiso del camarero para retirarme y después de soltar los tenedores me pongo a pensar un rato, fuera de la mesa:
 
       cout<<"Filosofo "<<id<< " PENSANDO"<<endl<<flush;
       sleep((rand()%10)+1 );//pensando
@@ -183,13 +333,5 @@ int main(int argc,char** argv ){
 
 
 
-      // Espera a que el filosofo suelte el tenedor...
-
-      //    MPI_Recv(&peticion, 1, MPI_INT, MPI_ANY_SOURCE, TAG_FILOSOFOS, MPI_COMM_WORLD, &status);
-
-      //    cout<<"Ten. "<<idProcesoTenedor<<" recibe liberac. de "<<Filo<<endl<<flush;
-
-
     }
   }
-  
