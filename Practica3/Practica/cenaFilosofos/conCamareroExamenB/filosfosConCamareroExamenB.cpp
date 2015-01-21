@@ -88,7 +88,7 @@ int main(int argc,char** argv ){
     /*
     Función que devuelve si un filósofo puede sentarse.
     */
-    bool puedeSentarse(int idFilosofo, int * contadorComidas){
+    bool puedeSentarse(int idFilosofo, int * contadorComidas, int *contadorPeticiones){
 
       //imprimeContador(contadorComidas);
 
@@ -103,7 +103,14 @@ int main(int argc,char** argv ){
         imprimeContador(contadorComidas);
         return true;
       }else{
-        cout << "Filosofo " << numFilosofo << " ya no puede comer más ! Ya ha comido " << contadorComidas[numFilosofo] << " veces!" << endl << flush;
+        /*
+        contadorPeticiones[numFilosofo]++;
+        cout << "Filosofo " << numFilosofo << " ya no puede comer más ! Ya ha comido " << contadorComidas[numFilosofo] << " veces! Fuera de aquí!" << endl << flush;
+        if(contadorPeticiones[numFilosofo]>20){
+          MPI_Finalize();
+          exit(0);
+        }
+        */
         return false;
       }
 
@@ -119,7 +126,7 @@ int main(int argc,char** argv ){
       cout << "##CAMARERO## Empieza a trabajar!" << endl << flush;
 
 
-      /*El camarero debe poder gestionar a los comensales y no permitir que se sientes más de cuatro.
+      /*El camarero debe poder gestionar a los comensales y no permitir que se sienten más de cuatro.
       Cada filósofo tiene su sitio asignado por lo que no tiene que preocuparse por eso.
       Para realizar esta gestión podemos declarar un avariable que sea filosofosSentados y que aumente o
       disminuya conforme vayan sentándose.
@@ -131,7 +138,9 @@ int main(int argc,char** argv ){
       */
 
       //Hay 5 filósofos.
+
       int contadorComidas[5]={0};
+      int contadorPeticiones[5]={0};
 
       int filosofosSentados=0;
       int peticion=0, respuesta=0;
@@ -160,8 +169,8 @@ int main(int argc,char** argv ){
         if(sentarse){
           // cout << "Camarero revista el estado de la mesa " << endl << flush;
         //3. Compruebo si hay sentados cuatro filósofos:
-
-          if(filosofosSentados<4 && puedeSentarse(status.MPI_SOURCE, contadorComidas)){
+          
+          if(filosofosSentados<4 && puedeSentarse(status.MPI_SOURCE, contadorComidas, contadorPeticiones)){
             cout << "Camarero dice: hay " << filosofosSentados << " filosofos sentados " << endl << flush;
             cout << "Camarero sienta a proceso  " << status.MPI_SOURCE << " en su sitio " << endl << flush;
             respuesta=1; //RESPUESTA POSITIVA->> puede sentarse!
